@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" href="leaflet/leaflet.css" />
+<link rel="stylesheet" href="leaflet/leaflet.label.css" />
+<script src="leaflet/leaflet.js"></script>
+<script src="leaflet/leaflet.label.js"></script>
+<script src="js/jquery-1.10.0.min.js"></script>
+<style>
+body { padding: 0; margin: 0; font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
+html, body, #map { height: 100%; }
+#mapprovider { z-index: 100; position: absolute; right: 20px; top: 20px; }
+#info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0}
+#infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
+#infoCloseImg { cursor: pointer; }
+#info .picture { width: 100px; height: 50px; margin: 10px 0 0 20px; border: 2px dashed #FFF; float: left; }
+#info .text { margin: 10px 20px; 0 20px; color: #FFF; float: left; }
+#info .text p { margin: 0; padding: 0; text-align: center; }
+#info .text .big { font-size: 24px; }
+#info .text .medium { font-size: 18px; }
+#info .text .normal { font-size: 14px; }
+</style>
+<script>
+	var config = {};
+	var map;
+	var layer;
+	var aircraftList = {};
+
+	config.tile = {};
+	config.tile.server = '../';
+	config.tile.provider = {0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 1 : {name: 'OpenStreetMap', path: 'tiles/osm/'}};
+
+	window.setInterval(function(){
+		$.getJSON('getdata.php', function(data){
+			updateData(data);
+		});
+	},2000);
+
+	$(document).ready(function() {
+		var mapSelect;
+		
+		// map provider select drop-down
+		mapSelect = $('#mapSelect');
+		for (i in config.tile.provider) {
+			var provider = config.tile.provider[i];
+
+			mapSelect.append($('<option id="' + i + '">').attr('id', provider.id).append(provider.name));	
+		}
+		mapSelect.change(function(){
+			var id = $('#mapSelect option:selected').attr('id');
+			
+			layer.setUrl(config.tile.server + config.tile.provider[id].path + '{z}/{x}/{y}.png');
+		});
+		
+		// draw map
+		map = L.map('map').setView([38.76,-9.12], 6);
+		layer = L.tileLayer(config.tile.server + config.tile.provider[0].path + '{z}/{x}/{y}.png', {
+			maxZoom: 10,
+			minZoom: 1,
+			reuseTiles: true
+		}).addTo(map);
+		
+	});
+	
+	function updateData(data) {
+		for (i in aircraftList) {
+			aircraftList[i].active = false;
+		}
+
+		for(i in data) {
+			var airplane = data[i];
+			
+			if (airplane.flight=='') {
+				airplane.flight = 'No callsign';
+			}
+			if (aircraftList[airplane.hex]==null) {
+				aircraftList[airplane.hex] = {};
+				aircraftList[airplane.hex].marker = new L.marker([airplane.lat, airplane.lon], {icon: new L.Icon({iconUrl: 'img/point.png', iconSize: [15,15]})});
+				aircraftList[airplane.hex].marker.bindLabel(airplane.flight, { noHide: true, className: 'label' });
+				aircraftList[airplane.hex].marker.addTo(map);
+				aircraftList[airplane.hex].marker.showLabel();
+
+			} else {
+				aircraftList[airplane.hex].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
+			}
+			aircraftList[airplane.hex].marker.updateLabelContent(airplane.flight);
+			aircraftList[airplane.hex].lat = airplane.lat;
+			aircraftList[airplane.hex].lon = airplane.lon;
+			aircraftList[airplane.hex].fligt = airplane.flight;
+			aircraftList[airplane.hex].heading = airplane.heading;
+			
+			aircraftList[airplane.hex].marker.on('click', function(data){
+				map.setView(new L.LatLng(aircraftList[airplane.hex].lat, aircraftList[airplane.hex].lon), map.getZoom());
+				
+				$('#info .callsign').html(aircraftList[airplane.hex].fligt);
+				$('#info .altitude').html(aircraftList[airplane.hex].altitude);
+				$('#info .heading').html(aircraftList[airplane.hex].heading);
+				$('#info').animate({bottom: 0}, 500, function(){});
+			});
+			aircraftList[airplane.hex].active = true;
+		}
+		
+		for (i in aircraftList) {
+			if (!aircraftList[i].active) {
+				map.removeLayer(aircraftList[i].marker);
+				aircraftList[i] = null;
+				delete aircraftList[i];
+			}
+		}
+	}
+	
+	function hideInfo() {
+		$('#info').css({bottom: '-70px'});
+	}
+</script>
+</head>
+<body>
+	<div id="mapprovider"><select id="mapSelect"></select></div>
+	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
+	<div id="info">
+		<div id="infoClose"><img id="infoCloseImg" src="img/close.png" onClick="hideInfo();"/></div>
+		<div class='picture'><img/></div>
+		<div class="text"><p class="callsign big">CALLSIGN</p><p class="model normal">Airplane Model</p></div>
+		<div class="text"><p class="medium">Speed</p><p class="speed normal">352 knot</p></div>
+		<div class="text"><p class="medium">Altitude</p><p class="altitude normal">FL350</p></div>
+		<div class="text"><p class="medium">Heading</p><p class="heading normal">042</p></div>
+	</div>
+</body>
+</html>
