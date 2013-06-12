@@ -26,7 +26,10 @@ L.Marker.include({
 	setIconAngle: function (iconAngle) {
 		this.options.iconAngle = iconAngle;
 
-		if (this._map) this.update();
+		if (this._map) {
+			console.log("updateing angle");
+		 this.update();
+		}
 	}
 });
 }());

@@ -8,18 +8,19 @@
 <script src="leaflet/leaflet.label.js"></script>
 <script src="js/jquery-1.10.0.min.js"></script>
 <style>
-body { padding: 0; margin: 0; font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
+body { padding: 0; margin: 0; font-family: "Hel	vetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
 html, body, #map { height: 100%; }
 #mapprovider { z-index: 100; position: absolute; right: 20px; top: 20px; }
-#info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0}
+#info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0; cursor: pointer; }
 #infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
-#infoCloseImg { cursor: pointer; }
 #info .picture { width: 100px; height: 50px; margin: 10px 0 0 20px; border: 2px dashed #FFF; float: left; }
 #info .text { margin: 10px 20px; 0 20px; color: #FFF; float: left; }
 #info .text p { margin: 0; padding: 0; text-align: center; }
 #info .text .big { font-size: 24px; }
 #info .text .medium { font-size: 18px; }
 #info .text .normal { font-size: 14px; }
+.leaflet-marker-icon { background: none !important; border: 0 !important; }
+.icon { overflow: hidden; position: relative; width: 20px; height: 20px; left: -10px; top: -10px; }
 </style>
 <script>
 	var config = {};
@@ -61,6 +62,9 @@ html, body, #map { height: 100%; }
 			reuseTiles: true
 		}).addTo(map);
 		
+		$('#info').on('click', function(){
+			hideInfo();
+		});
 	});
 	
 	function updateData(data) {
@@ -70,35 +74,39 @@ html, body, #map { height: 100%; }
 
 		for(i in data) {
 			var airplane = data[i];
-			
+			var id = airplane.hex;
+
 			if (airplane.flight=='') {
 				airplane.flight = 'No callsign';
 			}
-			if (aircraftList[airplane.hex]==null) {
-				aircraftList[airplane.hex] = {};
-				aircraftList[airplane.hex].marker = new L.marker([airplane.lat, airplane.lon], {icon: new L.Icon({iconUrl: 'img/point.png', iconSize: [15,15]})});
-				aircraftList[airplane.hex].marker.bindLabel(airplane.flight, { noHide: true, className: 'label' });
-				aircraftList[airplane.hex].marker.addTo(map);
-				aircraftList[airplane.hex].marker.showLabel();
+			if (aircraftList[id]==null) {
+				aircraftList[id] = {};
+				aircraftList[id].marker = new L.marker([airplane.lat, airplane.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [20,20] })});	
+				aircraftList[id].marker.bindLabel(airplane.flight, { noHide: true, className: 'label' });
+				aircraftList[id].marker.addTo(map);
+				aircraftList[id].marker.showLabel();
 
-			} else {
-				aircraftList[airplane.hex].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
 			}
-			aircraftList[airplane.hex].marker.updateLabelContent(airplane.flight);
-			aircraftList[airplane.hex].lat = airplane.lat;
-			aircraftList[airplane.hex].lon = airplane.lon;
-			aircraftList[airplane.hex].fligt = airplane.flight;
-			aircraftList[airplane.hex].heading = airplane.heading;
+
+			aircraftList[id].lat = airplane.lat;
+			aircraftList[id].lon = airplane.lon;
+			aircraftList[id].fligt = airplane.flight;
+			aircraftList[id].track = airplane.track;
+			aircraftList[id].active = true;
 			
-			aircraftList[airplane.hex].marker.on('click', function(data){
-				map.setView(new L.LatLng(aircraftList[airplane.hex].lat, aircraftList[airplane.hex].lon), map.getZoom());
+			aircraftList[id].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
+			aircraftList[id].marker.setIcon(new L.divIcon({html:'<img src="img/airplane.svg" class="icon" style="-webkit-transform: rotate(' + airplane.track +'deg)" />'}));
+			aircraftList[id].marker.updateLabelContent(airplane.flight);
+			aircraftList[id].marker.on('mousedown', function(data){
+				console.log("click");
+				map.setView(new L.LatLng(aircraftList[id].lat, aircraftList[id].lon), map.getZoom());
 				
-				$('#info .callsign').html(aircraftList[airplane.hex].fligt);
-				$('#info .altitude').html(aircraftList[airplane.hex].altitude);
-				$('#info .heading').html(aircraftList[airplane.hex].heading);
+				$('#info .callsign').html(aircraftList[id].fligt);
+				$('#info .altitude').html(aircraftList[id].altitude);
+				$('#info .heading').html(aircraftList[id].heading);
 				$('#info').animate({bottom: 0}, 500, function(){});
 			});
-			aircraftList[airplane.hex].active = true;
+			
 		}
 		
 		for (i in aircraftList) {
@@ -119,7 +127,6 @@ html, body, #map { height: 100%; }
 	<div id="mapprovider"><select id="mapSelect"></select></div>
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
 	<div id="info">
-		<div id="infoClose"><img id="infoCloseImg" src="img/close.png" onClick="hideInfo();"/></div>
 		<div class='picture'><img/></div>
 		<div class="text"><p class="callsign big">CALLSIGN</p><p class="model normal">Airplane Model</p></div>
 		<div class="text"><p class="medium">Speed</p><p class="speed normal">352 knot</p></div>
