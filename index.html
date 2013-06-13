@@ -67,7 +67,10 @@ html, body, #map { height: 100%; }
 		}).addTo(map);
 		
 		$('#info').on('click', function(){
-			hideInfo();
+			info.show = false;
+			
+			refreshInfo();
+			setIcon(info.id);
 		});
 	});
 	
@@ -79,7 +82,6 @@ html, body, #map { height: 100%; }
 		for(i in data) {
 			var airplane = data[i];
 			var id = airplane.hex;
-			var icon;
 	
 			if (airplane.flight=='') {
 				airplane.flight = 'No callsign';
@@ -102,6 +104,8 @@ html, body, #map { height: 100%; }
 					info.altitude = aList[hex].altitude;
 					info.speed = aList[hex].speed;
 
+					info.show = true;
+					
 					refreshInfo(hex);
 					
 				});
@@ -115,16 +119,13 @@ html, body, #map { height: 100%; }
 			aList[id].track = airplane.track;
 			aList[id].active = true;
 
-			if (info.id==id) {
-				icon = $(airplaneIcon.on).clone();
-			} else {
-				icon = $(airplaneIcon.off).clone();
-			}
+			
 
 			aList[id].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
 
 			//aList[id].marker.setIcon(new L.divIcon({html:'<img src="img/' + imgName + '" class="icon" style="-webkit-transform: rotate(' + airplane.track +'deg)" />'}));
-			aList[id].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + airplane.track + 'deg)')[0].outerHTML}));
+			//aList[id].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + airplane.track + 'deg)')[0].outerHTML}));
+			setIcon(id); 
 			aList[id].marker.updateLabelContent(airplane.flight);
 			
 			refreshInfo(id);
@@ -139,17 +140,28 @@ html, body, #map { height: 100%; }
 		}
 	}
 	
-	function hideInfo() {
-		$('#info').css({bottom: '-70px'});
+	function setIcon(hex) {
+		var icon;
+		
+		if (info.id==hex && info.show) {
+			icon = $(airplaneIcon.on).clone();
+		} else {
+			icon = $(airplaneIcon.off).clone();
+		}
+		aList[hex].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + aList[hex].track + 'deg)')[0].outerHTML}));
 	}
-
+	
 	function refreshInfo(hex) {
-		if (hex==info.id) {
-			$('#info .callsign').html(aList[hex].fligt);
-			$('#info .altitude').html(aList[hex].altitude + " feet");
-			$('#info .heading').html(aList[hex].track);
-			$('#info .speed').html(aList[hex].speed + " knot");
-			$('#info').animate({bottom: 0}, 500, function(){});
+		if (info.show) {
+			if (hex==info.id) {
+				$('#info .callsign').html(aList[hex].fligt);
+				$('#info .altitude').html(aList[hex].altitude + " feet");
+				$('#info .heading').html(aList[hex].track);
+				$('#info .speed').html(aList[hex].speed + " knot");
+				$('#info').animate({bottom: 0}, 500, function(){});
+			}
+		} else {
+			$('#info').css({bottom: '-70px'});
 		}
 	}
 </script>
