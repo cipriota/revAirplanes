@@ -28,7 +28,7 @@ html, body, #map { height: 100%; }
 	var layer;
 	var aList = {};
 	var info = {};
-	var airplaneIcon = {on: $('<img/>').attr('src', 'img/airplane_on.svg'), off: $('<img/>').attr('src', 'img/airplane.svg') };
+	var airplaneIcon = {on: $('<img />').attr('src', 'img/airplane_on.svg'), off: $('<img />').attr('src', 'img/airplane.svg') };
 	config.tile = {};
 	config.tile.server = '../';
 	config.tile.provider = {0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 1 : {name: 'OpenStreetMap', path: 'tiles/osm/'}};
@@ -40,7 +40,7 @@ html, body, #map { height: 100%; }
 		$.getJSON('getdata.php', function(data){
 			updateData(data);
 		});
-	},2000);
+	},5000);
 
 	$(document).ready(function() {
 		var mapSelect;
@@ -78,11 +78,26 @@ html, body, #map { height: 100%; }
 		for (i in aList) {
 			aList[i].active = false;
 		}
-
+		
 		for(i in data) {
-			var airplane = data[i];
+			//var airplane = data[i];
+			
+			//for flightradar24
+			var airplane = {};		
+			airplane.hex = data[i][0];
+			airplane.lat = data[i][1];
+			airplane.lon = data[i][2];
+			airplane.track = data[i][3];
+			airplane.altitude = data[i][4];
+			airplane.speed = data[i][5];
+			airplane.flight = data[i][13];
+
 			var id = airplane.hex;
 	
+			if (!map.getBounds().contains(new L.LatLng(airplane.lat, airplane.lon))) {
+				continue;
+			}
+
 			if (airplane.flight=='') {
 				airplane.flight = 'No callsign';
 			}
