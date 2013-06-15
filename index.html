@@ -10,7 +10,7 @@
 <style>
 body { padding: 0; margin: 0; font-family: "Hel	vetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
 html, body, #map { height: 100%; }
-#mapprovider { z-index: 100; position: absolute; right: 20px; top: 20px; }
+#mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
 #info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0; cursor: pointer; }
 #infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
 #info .picture { width: 100px; height: 50px; margin: 10px 0 0 20px; border: 2px dashed #FFF; float: left; }
@@ -40,7 +40,7 @@ html, body, #map { height: 100%; }
 		$.getJSON('getdata.php', function(data){
 			updateData(data);
 		});
-	},5000);
+	},2000);
 
 	$(document).ready(function() {
 		var mapSelect;
@@ -59,12 +59,15 @@ html, body, #map { height: 100%; }
 		});
 		
 		// draw map
-		map = L.map('map').setView([38.76,-9.12], 6);
+		map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 6);
+		(new L.Control.Zoom({position: 'topright'})).addTo(map);
 		layer = L.tileLayer(config.tile.server + config.tile.provider[0].path + '{z}/{x}/{y}.png', {
 			maxZoom: 11,
 			minZoom: 1,
 			reuseTiles: true
 		}).addTo(map);
+		
+		
 		
 		$('#info').on('click', function(){
 			info.show = false;
@@ -80,10 +83,10 @@ html, body, #map { height: 100%; }
 		}
 		
 		for(i in data) {
-			//var airplane = data[i];
+			var airplane = data[i];
 			
 			//for flightradar24
-			var airplane = {};		
+			/*var airplane = {};		
 			airplane.hex = data[i][0];
 			airplane.lat = data[i][1];
 			airplane.lon = data[i][2];
@@ -91,7 +94,7 @@ html, body, #map { height: 100%; }
 			airplane.altitude = data[i][4];
 			airplane.speed = data[i][5];
 			airplane.flight = data[i][13];
-
+*/
 			var id = airplane.hex;
 	
 			if (!map.getBounds().contains(new L.LatLng(airplane.lat, airplane.lon))) {
