@@ -13,7 +13,8 @@ html, body, #map { height: 100%; }
 #mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
 #info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0; cursor: pointer; }
 #infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
-#info .picture { width: 100px; height: 50px; margin: 10px 0 0 20px; border: 2px dashed #FFF; float: left; }
+#info .picture { height: 50px; margin: 10px 0 0 20px; float: left; }
+#info .picture img { width: 150px; position: relative; bottom: 50px; /*border: 2px dashed #FFF;*/ border-radius: 8px; }
 #info .text { margin: 10px 20px; 0 20px; color: #FFF; float: left; }
 #info .text p { margin: 0; padding: 0; text-align: center; }
 #info .text .big { font-size: 24px; }
@@ -31,7 +32,12 @@ html, body, #map { height: 100%; }
 	var airplaneIcon = {on: $('<img />').attr('src', 'img/airplane_on.svg'), off: $('<img />').attr('src', 'img/airplane.svg') };
 	config.tile = {};
 	config.tile.server = '../';
-	config.tile.provider = {0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 1 : {name: 'OpenStreetMap', path: 'tiles/osm/'}};
+	config.tile.provider = {
+		0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 
+		1: {name: 'CloudMate Night', path: 'tiles/cloudmatenight/'}, 
+		2: {name: 'ThunderForest', path: 'tiles/thunderforest/'},
+		3 : {name: 'OpenStreetMap', path: 'tiles/osm/'}
+	};
 
 	$.getJSON('getdata.php', function(data){
 		updateData(data);
@@ -59,7 +65,7 @@ html, body, #map { height: 100%; }
 		});
 		
 		// draw map
-		map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 6);
+		map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 8);
 		(new L.Control.Zoom({position: 'topright'})).addTo(map);
 		layer = L.tileLayer(config.tile.server + config.tile.provider[0].path + '{z}/{x}/{y}.png', {
 			maxZoom: 11,
@@ -84,17 +90,6 @@ html, body, #map { height: 100%; }
 		
 		for(i in data) {
 			var airplane = data[i];
-			
-			//for flightradar24
-			/*var airplane = {};		
-			airplane.hex = data[i][0];
-			airplane.lat = data[i][1];
-			airplane.lon = data[i][2];
-			airplane.track = data[i][3];
-			airplane.altitude = data[i][4];
-			airplane.speed = data[i][5];
-			airplane.flight = data[i][13];
-*/
 			var id = airplane.hex;
 	
 			if (!map.getBounds().contains(new L.LatLng(airplane.lat, airplane.lon))) {
@@ -110,6 +105,12 @@ html, body, #map { height: 100%; }
 				aList[id].marker.bindLabel(airplane.flight, { noHide: true, className: 'label' });
 				aList[id].marker.addTo(map);
 				aList[id].marker.showLabel();
+
+				$.getJSON('getinfo.php?modeS='+id).done(function (infoData){
+					aList[infoData.modeS].registration = infoData.registration;
+					aList[infoData.modeS].airline = infoData.airline;
+					console.log(infoData);
+				});
 				
 				$(aList[id].marker).click({hex: id}, function(e){
 					var hex = e.data.hex;
@@ -121,7 +122,7 @@ html, body, #map { height: 100%; }
 					info.track = aList[hex].track;
 					info.altitude = aList[hex].altitude;
 					info.speed = aList[hex].speed;
-
+					info.registration = aList[hex].registration;
 					info.show = true;
 					
 					refreshInfo(hex);
@@ -176,9 +177,18 @@ html, body, #map { height: 100%; }
 				$('#info .altitude').html(aList[hex].altitude + " feet");
 				$('#info .heading').html(aList[hex].track);
 				$('#info .speed').html(aList[hex].speed + " knot");
+				$('#info .registration').html(aList[hex].registration);
+				$('#info img').attr('src', 'img/aircraft/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
 				$('#info').animate({bottom: 0}, 500, function(){});
 			}
 		} else {
+			$('#info .callsign').html('');
+			$('#info .altitude').html('');
+			$('#info .heading').html('');
+			$('#info .speed').html('');
+			$('#info .registration').html('');
+			$('#info img').attr('src', '');
+			$('#info img').removeAttr('src')
 			$('#info').css({bottom: '-70px'});
 		}
 	}
@@ -189,7 +199,7 @@ html, body, #map { height: 100%; }
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
 	<div id="info">
 		<div class='picture'><img/></div>
-		<div class="text"><p class="callsign big">CALLSIGN</p><p class="model normal">Airplane Model</p></div>
+		<div class="text"><p class="callsign big">CALLSIGN</p><p class="registration normal">Airplane Model</p></div>
 		<div class="text"><p class="medium">Speed</p><p class="speed normal">0 knot</p></div>
 		<div class="text"><p class="medium">Altitude</p><p class="altitude normal">0</p></div>
 		<div class="text"><p class="medium">Heading</p><p class="heading normal">0</p></div>
