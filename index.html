@@ -132,6 +132,7 @@ html, body, #map { height: 100%; }
 				});
 
 			}
+			
 			aList[id].altitude = airplane.altitude;
 			aList[id].speed = airplane.speed;
 			aList[id].lat = airplane.lat;
@@ -139,8 +140,6 @@ html, body, #map { height: 100%; }
 			aList[id].fligt = airplane.flight;
 			aList[id].track = airplane.track;
 			aList[id].active = true;
-
-			
 
 			aList[id].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
 
@@ -183,14 +182,26 @@ html, body, #map { height: 100%; }
 				
 				if (firstTime==true) {
 					var image = $('<img/>');
+					var url;
 					
 					$('#info .picture').empty();
 					
+					url = '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg';
 					image.attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
 					console.log(image[0].width);
-					if (image[0].width!=0) {
-						$('#info .picture').append(image);
-					}
+					
+					
+					$.ajax({
+						type: 'HEAD',
+						url: url,
+						success: function() {
+							$('#info .picture').append(image);
+						},  
+						error: function() {
+							console.log('Page not found.');
+						}
+					});
+					
 					//$('#info img').attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
 					$('#info').animate({bottom: 0}, 500, function(){});
 				}
@@ -201,10 +212,16 @@ html, body, #map { height: 100%; }
 			$('#info .heading').html('');
 			$('#info .speed').html('');
 			$('#info .registration').html('');
-			$('#info img').attr('src', '');
-			$('#info img').removeAttr('src')
+			$('#info .picture').empty();
 			$('#info').css({bottom: '-70px'});
 		}
+	}
+	
+	function imageExist(url) {
+		var img = new Image();
+		img.src = url;
+		
+		return img.height != 0;
 	}
 </script>
 </head>
