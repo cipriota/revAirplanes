@@ -10,16 +10,18 @@
 <style>
 body { padding: 0; margin: 0; font-family: "Hel	vetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
 html, body, #map { height: 100%; }
+
 #mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
 #info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0; cursor: pointer; }
 #infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
-#info .picture { height: 50px; margin: 10px 0 0 20px; float: left; }
+#info .picture { height: 50px; margin: 10px 0 0 20px; float: left; opacity }
 #info .picture img { width: 150px; position: relative; bottom: 50px; /*border: 2px dashed #FFF;*/ border-radius: 8px; }
 #info .text { margin: 10px 20px; 0 20px; color: #FFF; float: left; }
 #info .text p { margin: 0; padding: 0; text-align: center; }
 #info .text .big { font-size: 24px; }
 #info .text .medium { font-size: 18px; }
 #info .text .normal { font-size: 14px; }
+
 .leaflet-marker-icon { background: none !important; border: 0 !important; }
 .icon { overflow: hidden; position: relative; width: 20px; height: 20px; left: -10px; top: -10px; }
 </style>
@@ -36,7 +38,7 @@ html, body, #map { height: 100%; }
 		0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 
 		1: {name: 'CloudMate Night', path: 'tiles/cloudmatenight/'}, 
 		2: {name: 'ThunderForest', path: 'tiles/thunderforest/'},
-		3 : {name: 'OpenStreetMap', path: 'tiles/osm/'}
+		3: {name: 'OpenStreetMap', path: 'tiles/osm/'}
 	};
 
 	$.getJSON('getdata.php', function(data){
@@ -78,7 +80,7 @@ html, body, #map { height: 100%; }
 		$('#info').on('click', function(){
 			info.show = false;
 			
-			refreshInfo();
+			refreshInfo(null, false);
 			setIcon(info.id);
 		});
 	});
@@ -109,7 +111,7 @@ html, body, #map { height: 100%; }
 				$.getJSON('getinfo.php?modeS='+id).done(function (infoData){
 					aList[infoData.modeS].registration = infoData.registration;
 					aList[infoData.modeS].airline = infoData.airline;
-					console.log(infoData);
+					//console.log(infoData);
 				});
 				
 				$(aList[id].marker).click({hex: id}, function(e){
@@ -125,7 +127,7 @@ html, body, #map { height: 100%; }
 					info.registration = aList[hex].registration;
 					info.show = true;
 					
-					refreshInfo(hex);
+					refreshInfo(hex, true);
 					
 				});
 
@@ -147,7 +149,7 @@ html, body, #map { height: 100%; }
 			setIcon(id); 
 			aList[id].marker.updateLabelContent(airplane.flight);
 			
-			refreshInfo(id);
+			refreshInfo(id, false);
 		}
 		
 		for (i in aList) {
@@ -170,7 +172,7 @@ html, body, #map { height: 100%; }
 		aList[hex].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + aList[hex].track + 'deg)')[0].outerHTML}));
 	}
 	
-	function refreshInfo(hex) {
+	function refreshInfo(hex, firstTime) {
 		if (info.show) {
 			if (hex==info.id) {
 				$('#info .callsign').html(aList[hex].fligt);
@@ -178,8 +180,20 @@ html, body, #map { height: 100%; }
 				$('#info .heading').html(aList[hex].track);
 				$('#info .speed').html(aList[hex].speed + " knot");
 				$('#info .registration').html(aList[hex].registration);
-				$('#info img').attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
-				$('#info').animate({bottom: 0}, 500, function(){});
+				
+				if (firstTime==true) {
+					var image = $('<img/>');
+					
+					$('#info .picture').empty();
+					
+					image.attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
+					console.log(image[0].width);
+					if (image[0].width!=0) {
+						$('#info .picture').append(image);
+					}
+					//$('#info img').attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
+					$('#info').animate({bottom: 0}, 500, function(){});
+				}
 			}
 		} else {
 			$('#info .callsign').html('');
@@ -198,7 +212,7 @@ html, body, #map { height: 100%; }
 	<div id="mapprovider"><select id="mapSelect"></select></div>
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
 	<div id="info">
-		<div class='picture'><img/></div>
+		<div class='picture'></div>
 		<div class="text"><p class="callsign big">CALLSIGN</p><p class="registration normal">Airplane Model</p></div>
 		<div class="text"><p class="medium">Speed</p><p class="speed normal">0 knot</p></div>
 		<div class="text"><p class="medium">Altitude</p><p class="altitude normal">0</p></div>
