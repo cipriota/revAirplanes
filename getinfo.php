@@ -7,7 +7,7 @@
 		die;
 		
 	try {
-		$dbh = new PDO('sqlite:/db/basestation.sqb');
+		$dbh = new PDO('sqlite:../db/basestation.sqb');
 	
 		/*foreach ($dbh->query('SELECT registration FROM aircraft where modeS like \'4950F5\'') as $row) {
     		print_r($row['Registration']);
