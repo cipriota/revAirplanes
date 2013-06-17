@@ -7,23 +7,30 @@
 <script src="leaflet/leaflet.js"></script>
 <script src="leaflet/leaflet.label.js"></script>
 <script src="js/jquery-1.10.0.min.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
 <style>
-body { padding: 0; margin: 0; font-family: "Hel	vetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
+body { padding: 0; margin: 0; font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
 html, body, #map { height: 100%; }
 
 #mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
-#info { background: #000; width: 100%; height: 70px; z-index: 2000; position: absolute; bottom: -70px; opacity: 0.7; border: 0; cursor: pointer; }
-#infoClose { margin-left: 20px; margin-top: 20px; color: #FFF; float: left; }
-#info .picture { height: 50px; margin: 10px 0 0 20px; float: left; opacity }
-#info .picture img { width: 150px; position: relative; bottom: 50px; /*border: 2px dashed #FFF;*/ border-radius: 8px; }
-#info .text { margin: 10px 20px; 0 20px; color: #FFF; float: left; }
-#info .text p { margin: 0; padding: 0; text-align: center; }
-#info .text .big { font-size: 24px; }
-#info .text .medium { font-size: 18px; }
-#info .text .normal { font-size: 14px; }
+#info { z-index: 1998; position: absolute; top: 10px; left: 10px; border: 0; cursor: pointer;}
+#info {color: #FFF; float: left; }
+#info .container { background: #000; opacity: 0.8; border-radius: 10px; padding: 10px; }
+#info .picture { float: left; z-index: 1999; text-align: center; width: 100%; margin-bottom: 10px; }
+#info .picture img { width: 100%; max-width: 200px; border-radius: 4px; }
+#info .callsign { width: 100%; text-align: center; margin-bottom: 10px; }
+#info .destination { margin-bottom: 20px; }
+#info  p { margin: 0; padding: 0; text-align: center; }
+#info .big { font-size: 24px; }
+#info .medium { font-size: 18px; margin-top: 10px; }
+#info .normal { font-size: 14px; }
+
+.visible { display: block; }
+.hidden { display: none; }
 
 .leaflet-marker-icon { background: none !important; border: 0 !important; }
 .icon { overflow: hidden; position: relative; width: 20px; height: 20px; left: -10px; top: -10px; }
+
 </style>
 <script>
 	var config = {};
@@ -31,7 +38,8 @@ html, body, #map { height: 100%; }
 	var layer;
 	var aList = {};
 	var info = {};
-	var airplaneIcon = {on: $('<img />').attr('src', 'img/airplane_on.svg'), off: $('<img />').attr('src', 'img/airplane.svg') };
+	var airplaneIcon = {on: $("<img>").attr('src', 'img/airplane_on.svg'), off: $("<img>").attr('src', 'img/airplane.svg') };
+	
 	config.tile = {};
 	config.tile.server = '../';
 	config.tile.provider = {
@@ -111,7 +119,7 @@ html, body, #map { height: 100%; }
 				$.getJSON('getinfo.php?modeS='+id).done(function (infoData){
 					aList[infoData.modeS].registration = infoData.registration;
 					aList[infoData.modeS].airline = infoData.airline;
-					//console.log(infoData);
+					
 				});
 				
 				$(aList[id].marker).click({hex: id}, function(e){
@@ -133,20 +141,34 @@ html, body, #map { height: 100%; }
 
 			}
 			
+			if (aList[id].flightInfo == null && airplane.flight != null) {
+
+				$.getJSON('getflight.php?modeS='+id+"&flight="+airplane.flight).done(function (infoData){
+					aList[infoData.modeS].flightInfo = {};
+					aList[infoData.modeS].flightInfo.destination = {};
+					aList[infoData.modeS].flightInfo.destination.name = infoData.destName;
+					aList[infoData.modeS].flightInfo.destination.iata = infoData.destIATA;
+					aList[infoData.modeS].flightInfo.origin = {};
+					aList[infoData.modeS].flightInfo.origin.name = infoData.originName;
+					aList[infoData.modeS].flightInfo.origin.iata = infoData.originIATA;
+
+					refreshInfo(id, false);
+
+				});
+			}
+
 			aList[id].altitude = airplane.altitude;
 			aList[id].speed = airplane.speed;
 			aList[id].lat = airplane.lat;
 			aList[id].lon = airplane.lon;
 			aList[id].fligt = airplane.flight;
 			aList[id].track = airplane.track;
+			aList[id].marker.updateLabelContent(airplane.flight);
 			aList[id].active = true;
 
 			aList[id].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
 
-			//aList[id].marker.setIcon(new L.divIcon({html:'<img src="img/' + imgName + '" class="icon" style="-webkit-transform: rotate(' + airplane.track +'deg)" />'}));
-			//aList[id].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + airplane.track + 'deg)')[0].outerHTML}));
-			setIcon(id); 
-			aList[id].marker.updateLabelContent(airplane.flight);
+			updateIcon(id); 
 			
 			refreshInfo(id, false);
 		}
@@ -160,7 +182,7 @@ html, body, #map { height: 100%; }
 		}
 	}
 	
-	function setIcon(hex) {
+	function updateIcon(hex) {
 		var icon;
 		
 		if (info.id==hex && info.show) {
@@ -174,14 +196,24 @@ html, body, #map { height: 100%; }
 	function refreshInfo(hex, firstTime) {
 		if (info.show) {
 			if (hex==info.id) {
-				$('#info .callsign').html(aList[hex].fligt);
-				$('#info .altitude').html(aList[hex].altitude + " feet");
-				$('#info .heading').html(aList[hex].track);
-				$('#info .speed').html(aList[hex].speed + " knot");
-				$('#info .registration').html(aList[hex].registration);
-				
+				$('#info .flight .value').html(aList[hex].fligt);
+				$('#info .altitude .value').html(aList[hex].altitude + " feet");
+				$('#info .heading .value').html(aList[hex].track);
+				$('#info .speed .value').html(aList[hex].speed + " knot");
+				$('#info .registration .value').html(aList[hex].registration);
+				if (aList[hex].flightInfo.destination.name != "") {
+					$('#info .destination .value').html("To: " + aList[hex].flightInfo.destination.name);
+				} else {
+					$('#info .destination .value').html("To: unavailable");
+				}				
+				if (aList[hex].flightInfo.origin.name != "") {
+					$('#info .origin .value').html("From: " + aList[hex].flightInfo.origin.name);
+				} else {
+					$('#info .origin .value').html("From: unavailable");
+				}
+
 				if (firstTime==true) {
-					var image = $('<img/>');
+					var image = $('<img>');
 					var url;
 					
 					$('#info .picture').empty();
@@ -196,24 +228,24 @@ html, body, #map { height: 100%; }
 						url: url,
 						success: function() {
 							$('#info .picture').append(image);
-						},  
-						error: function() {
-							console.log('Page not found.');
 						}
 					});
 					
 					//$('#info img').attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
-					$('#info').animate({bottom: 0}, 500, function(){});
+					//$('#info').animate({display: 'block'}, 500, function(){console.log("here");});
+					$('#info').removeClass('hidden');
+					$('#info').addClass('visible');
 				}
 			}
 		} else {
-			$('#info .callsign').html('');
-			$('#info .altitude').html('');
-			$('#info .heading').html('');
-			$('#info .speed').html('');
-			$('#info .registration').html('');
+
+			$('#info .flight .value').html('');
+			$('#info .altitude .value').html('');
+			$('#info .heading .value').html('');
+			$('#info .speed .value').html('');
+			$('#info .registration .value').html('');
 			$('#info .picture').empty();
-			$('#info').css({bottom: '-70px'});
+
 		}
 	}
 	
@@ -228,12 +260,18 @@ html, body, #map { height: 100%; }
 <body>
 	<div id="mapprovider"><select id="mapSelect"></select></div>
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
-	<div id="info">
-		<div class='picture'></div>
-		<div class="text"><p class="callsign big">CALLSIGN</p><p class="registration normal">Airplane Model</p></div>
-		<div class="text"><p class="medium">Speed</p><p class="speed normal">0 knot</p></div>
-		<div class="text"><p class="medium">Altitude</p><p class="altitude normal">0</p></div>
-		<div class="text"><p class="medium">Heading</p><p class="heading normal">0</p></div>
+	<div id="info" class="hidden">
+		<div class="container">
+			<div class='picture'></div>
+			<div class="flight"><p class="value big">CALLSIGN</p></div>
+			<div class="registration"><p class="value normal">CS-TGV</p></div>
+			<div class="origin"><p class="value normal"></p></div>
+			<div class="destination"><p class="value normal"></p></div>
+			<div class="speed"><p class="medium">Speed</p><p class="value normal">0 knot</p></div>
+			<div class="altitude"><p class="medium">Altitude</p><p class="value normal">0</p></div>
+			<div class="heading"><p class="medium">Heading</p><p class="value normal">0</p></div>
+			
+		</div>
 	</div>
 </body>
 </html>
