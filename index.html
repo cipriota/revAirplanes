@@ -18,7 +18,7 @@ html, body, #map { height: 100%; }
 #info .container { background: #000; opacity: 0.8; border-radius: 10px; padding: 10px; }
 #info .picture { float: left; z-index: 1999; text-align: center; width: 100%; margin-bottom: 10px; }
 #info .picture img { width: 100%; max-width: 200px; border-radius: 4px; }
-#info .flight { width: 100%; text-align: center; margin-bottom: 10px; }
+#info .registration { width: 100%; text-align: center; margin-bottom: 10px; }
 #info .destination { margin-bottom: 20px; }
 #info  p { margin: 0; padding: 0; text-align: center; }
 #info .big { font-size: 24px; }
@@ -89,6 +89,7 @@ html, body, #map { height: 100%; }
 			info.show = false;
 			
 			refreshInfo(null, false);
+
 			setIcon(info.id);
 		});
 	});
@@ -204,12 +205,12 @@ html, body, #map { height: 100%; }
 				if (aList[hex].flightInfo.destination.name != "") {
 					$('#info .destination .value').html("To: " + aList[hex].flightInfo.destination.name);
 				} else {
-					$('#info .destination .value').html("To: unavailable");
+					$('#info .destination .value').html("To: -");
 				}				
 				if (aList[hex].flightInfo.origin.name != "") {
 					$('#info .origin .value').html("From: " + aList[hex].flightInfo.origin.name);
 				} else {
-					$('#info .origin .value').html("From: unavailable");
+					$('#info .origin .value').html("From: -");
 				}
 
 				if (firstTime==true) {
@@ -246,6 +247,8 @@ html, body, #map { height: 100%; }
 			$('#info .registration .value').html('');
 			$('#info .picture').empty();
 
+			$('#info').removeClass('visible');
+			$('#info').addClass('hidden');
 		}
 	}
 	
