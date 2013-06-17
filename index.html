@@ -15,7 +15,7 @@ html, body, #map { height: 100%; }
 #mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
 #info { z-index: 1998; position: absolute; top: 10px; left: 10px; border: 0; cursor: pointer;}
 #info {color: #FFF; float: left; }
-#info .container { background: #000; opacity: 0.8; border-radius: 10px; padding: 10px; }
+#info .container { background: #111; border-radius: 10px; padding: 10px; }
 #info .picture { float: left; z-index: 1999; text-align: center; width: 100%; margin-bottom: 10px; }
 #info .picture img { width: 100%; max-width: 200px; border-radius: 4px; }
 #info .registration { width: 100%; text-align: center; margin-bottom: 10px; }
@@ -107,9 +107,7 @@ html, body, #map { height: 100%; }
 				continue;
 			}
 
-			if (airplane.flight=='') {
-				airplane.flight = 'No callsign';
-			}
+			
 			if (aList[id]==null) {
 				aList[id] = {};
 				aList[id].marker = new L.marker([airplane.lat, airplane.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [20,20] })});	
@@ -117,6 +115,10 @@ html, body, #map { height: 100%; }
 				aList[id].marker.addTo(map);
 				aList[id].marker.showLabel();
 
+				if (airplane.flight=='') {
+					airplane.flight = 'No callsign';
+				}
+				
 				$.getJSON('getinfo.php?modeS='+id).done(function (infoData){
 					aList[infoData.modeS].registration = infoData.registration;
 					aList[infoData.modeS].airline = infoData.airline;
@@ -142,7 +144,7 @@ html, body, #map { height: 100%; }
 
 			}
 			
-			if (aList[id].flightInfo == null && airplane.flight != null) {
+			if (aList[id].flightInfo == null && airplane.flight != null && airplane.flight != 'No callsign') {
 
 				$.getJSON('getflight.php?modeS='+id+"&flight="+airplane.flight).done(function (infoData){
 					aList[infoData.modeS].flightInfo = {};
