@@ -52,6 +52,7 @@ html, body, #map { height: 100%; }
 	$.getJSON('getdata.php', function(data){
 		updateData(data);
 	});
+	
 	window.setInterval(function(){
 		$.getJSON('getdata.php', function(data){
 			updateData(data);

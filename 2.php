@@ -12,21 +12,33 @@
 </head>
 <body>
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
-	<div id="info">
-		<div class="picture"></div>
+	<div id="info" class="hidden">
+		<div class="picture"> 	
+		</div>
 		<div class="flight"></div>
 		<div class="registration"></div>
 		<div class="airports">
 			<div class="from">
-				<div class="title">From</title>
+				<div class="caption">From</div>
+				<div class="value"></div>
 			</div>
 			<div class="to">
-				<div class="title">To</title>
+				<div class="caption">To</div>
+				<div class="value"></div>
 			</div>		
 		</div>
-		<div class="speed">160 knot</div>
-		<div class="altitude"></div>
-		<div class="heading"></div>
+		<div class="speed">
+			<div class="caption">Speed</div>
+			<div class="value"></div>
+		</div>
+		<div class="altitude">
+			<div class="caption">Altitude</div>
+			<div class="value"></div>
+		</div>
+		<div class="heading">
+			<div class="caption">Heading</div>
+			<div class="value"></div>
+		</div>
 	</div>
 </body>
 </html>

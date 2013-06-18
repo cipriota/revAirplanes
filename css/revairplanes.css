@@ -1,4 +1,9 @@
-body { padding: 0; margin: 0; font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
+body { 
+	padding: 0; 
+	margin: 0; 
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
+
 html, body, #map { height: 100%; }
 
 .visible { display: block; }
@@ -6,7 +11,66 @@ html, body, #map { height: 100%; }
 .leaflet-marker-icon { background: none !important; border: 0 !important; }
 .icon { overflow: hidden; position: relative; width: 20px; height: 20px; left: -10px; top: -10px; }
 
-#mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
+#info { 
+	position: absolute; 
+	top: 10px; 
+	left: 10px; 
+	padding: 10px; 
+	background: rgb(30, 30, 30); 
+	color: rgb(250,250,250); 
+	border-radius: 10px; 
+	width: 20%; 
+	min-width: 100px; 
+	max-width: 200px; 
+	text-align: center;
+	cursor: pointer;
+}
+
+#info .airports, #info .speed, #info .altitude, #info .heading {
+	clear: right;
+	width: 100%; 
+	display: inline-block;
+	margin-bottom: 20px; 
+}
+
+#info .flight {
+	font-size: 24px; 
+	margin-bottom: 5px; 
+}
+
+#info .registration {
+	font-size: 12px; 
+	margin-bottom: 20px; 
+}
+
+#info .value {
+	font-size: 14px; 
+}
+
+#info .caption {
+	font-size: 18px;
+	font-weight: bold; 
+	margin-bottom: 10px; 
+}
+
+#info .from, #info .to {
+	float: left; 
+	width: 50%; 
+}
+
+#info .picture {
+	 margin-bottom: 20px; 
+}
+
+#info .picture img {
+	width: 100%; 
+	max-width: 200px; 
+	border-radius: 7px;
+}
+
+#info .speed, #info .altitude, #info heading {
+
+} 
 
 
 
