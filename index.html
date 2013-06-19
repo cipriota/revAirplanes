@@ -1,282 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<link rel="stylesheet" href="leaflet/leaflet.css" />
-<link rel="stylesheet" href="leaflet/leaflet.label.css" />
-<script src="leaflet/leaflet.js"></script>
-<script src="leaflet/leaflet.label.js"></script>
-<script src="js/jquery-1.10.0.min.js"></script>
-<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
-<style>
-body { padding: 0; margin: 0; font-family: "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
-html, body, #map { height: 100%; }
-
-#mapprovider { z-index: 100; position: absolute; right: 60px; top: 10px; }
-#info { z-index: 1998; position: absolute; top: 10px; left: 10px; border: 0; cursor: pointer;}
-#info {color: #FFF; float: left; }
-#info .container { background: #111; border-radius: 10px; padding: 10px; }
-#info .picture { float: left; z-index: 1999; text-align: center; width: 100%; margin-bottom: 10px; }
-#info .picture img { width: 100%; max-width: 200px; border-radius: 4px; }
-#info .registration { width: 100%; text-align: center; margin-bottom: 10px; }
-#info .destination { margin-bottom: 20px; }
-#info  p { margin: 0; padding: 0; text-align: center; }
-#info .big { font-size: 24px; }
-#info .medium { font-size: 18px; margin-top: 10px; }
-#info .normal { font-size: 14px; }
-
-.visible { display: block; }
-.hidden { display: none; }
-
-.leaflet-marker-icon { background: none !important; border: 0 !important; }
-.icon { overflow: hidden; position: relative; width: 20px; height: 20px; left: -10px; top: -10px; }
-
-</style>
-<script>
-	var config = {};
-	var map;
-	var layer;
-	var aList = {};
-	var info = {};
-	var airplaneIcon = {on: $("<img>").attr('src', 'img/airplane_on.svg'), off: $("<img>").attr('src', 'img/airplane.svg') };
-	
-	config.tile = {};
-	config.tile.server = '../';
-	config.tile.provider = {
-		0: {name: 'CloudMate', path: 'tiles/cloudmate/'}, 
-		1: {name: 'CloudMate Night', path: 'tiles/cloudmatenight/'}, 
-		2: {name: 'ThunderForest', path: 'tiles/thunderforest/'},
-		3: {name: 'OpenStreetMap', path: 'tiles/osm/'}
-	};
-
-	$.getJSON('getdata.php', function(data){
-		updateData(data);
-	});
-	
-	window.setInterval(function(){
-		$.getJSON('getdata.php', function(data){
-			updateData(data);
-		});
-	},2000);
-
-	$(document).ready(function() {
-		var mapSelect;
-		
-		// map provider select drop-down
-		mapSelect = $('#mapSelect');
-		for (i in config.tile.provider) {
-			var provider = config.tile.provider[i];
-
-			mapSelect.append($('<option id="' + i + '">').attr('id', provider.id).append(provider.name));	
-		}
-		mapSelect.change(function(){
-			var id = $('#mapSelect option:selected').attr('id');
-			
-			layer.setUrl(config.tile.server + config.tile.provider[id].path + '{z}/{x}/{y}.png');
-		});
-		
-		// draw map
-		map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 8);
-		(new L.Control.Zoom({position: 'topright'})).addTo(map);
-		layer = L.tileLayer(config.tile.server + config.tile.provider[0].path + '{z}/{x}/{y}.png', {
-			maxZoom: 11,
-			minZoom: 1,
-			reuseTiles: true
-		}).addTo(map);
-		
-		
-		
-		$('#info').on('click', function(){
-			info.show = false;
-			
-			refreshInfo(null, false);
-
-			setIcon(info.id);
-		});
-	});
-	
-	function updateData(data) {
-		for (i in aList) {
-			aList[i].active = false;
-		}
-		
-		for(i in data) {
-			var airplane = data[i];
-			var id = airplane.hex;
-	
-			if (!map.getBounds().contains(new L.LatLng(airplane.lat, airplane.lon))) {
-				continue;
-			}
-
-			
-			if (aList[id]==null) {
-				aList[id] = {};
-				aList[id].marker = new L.marker([airplane.lat, airplane.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [20,20] })});	
-				aList[id].marker.bindLabel(airplane.flight, { noHide: true, className: 'label' });
-				aList[id].marker.addTo(map);
-				aList[id].marker.showLabel();
-
-				if (airplane.flight=='') {
-					airplane.flight = 'No callsign';
-				}
-				
-				$.getJSON('getinfo.php?modeS='+id).done(function (infoData){
-					aList[infoData.modeS].registration = infoData.registration;
-					aList[infoData.modeS].airline = infoData.airline;
-					
-				});
-				
-				$(aList[id].marker).click({hex: id}, function(e){
-					var hex = e.data.hex;
-				
-					map.setView(new L.LatLng(aList[hex].lat, aList[hex].lon), map.getZoom());
-
-					info.id = hex;
-					info.flight = aList[hex].fligt;
-					info.track = aList[hex].track;
-					info.altitude = aList[hex].altitude;
-					info.speed = aList[hex].speed;
-					info.registration = aList[hex].registration;
-					info.show = true;
-					
-					refreshInfo(hex, true);
-					
-				});
-
-			}
-			
-			if (aList[id].flightInfo == null && airplane.flight != null && airplane.flight != 'No callsign') {
-
-				$.getJSON('getflight.php?modeS='+id+"&flight="+airplane.flight).done(function (infoData){
-					aList[infoData.modeS].flightInfo = {};
-					aList[infoData.modeS].flightInfo.destination = {};
-					aList[infoData.modeS].flightInfo.destination.name = infoData.destName;
-					aList[infoData.modeS].flightInfo.destination.iata = infoData.destIATA;
-					aList[infoData.modeS].flightInfo.origin = {};
-					aList[infoData.modeS].flightInfo.origin.name = infoData.originName;
-					aList[infoData.modeS].flightInfo.origin.iata = infoData.originIATA;
-
-					refreshInfo(id, false);
-
-				});
-			}
-
-			aList[id].altitude = airplane.altitude;
-			aList[id].speed = airplane.speed;
-			aList[id].lat = airplane.lat;
-			aList[id].lon = airplane.lon;
-			aList[id].fligt = airplane.flight;
-			aList[id].track = airplane.track;
-			aList[id].marker.updateLabelContent(airplane.flight);
-			aList[id].active = true;
-
-			aList[id].marker.setLatLng(new L.LatLng(airplane.lat, airplane.lon));
-
-			updateIcon(id); 
-			
-			refreshInfo(id, false);
-		}
-		
-		for (i in aList) {
-			if (!aList[i].active) {
-				map.removeLayer(aList[i].marker);
-				aList[i] = null;
-				delete aList[i];
-			}
-		}
-	}
-	
-	function updateIcon(hex) {
-		var icon;
-		
-		if (info.id==hex && info.show) {
-			icon = $(airplaneIcon.on).clone();
-		} else {
-			icon = $(airplaneIcon.off).clone();
-		}
-		aList[hex].marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + aList[hex].track + 'deg)')[0].outerHTML}));
-	}
-	
-	function refreshInfo(hex, firstTime) {
-		if (info.show) {
-			if (hex==info.id) {
-				$('#info .flight .value').html(aList[hex].fligt);
-				$('#info .altitude .value').html(aList[hex].altitude + " feet");
-				$('#info .heading .value').html(aList[hex].track);
-				$('#info .speed .value').html(aList[hex].speed + " knot");
-				$('#info .registration .value').html(aList[hex].registration);
-				if (aList[hex].flightInfo.destination.name != "") {
-					$('#info .destination .value').html("To: " + aList[hex].flightInfo.destination.name);
-				} else {
-					$('#info .destination .value').html("To: -");
-				}				
-				if (aList[hex].flightInfo.origin.name != "") {
-					$('#info .origin .value').html("From: " + aList[hex].flightInfo.origin.name);
-				} else {
-					$('#info .origin .value').html("From: -");
-				}
-
-				if (firstTime==true) {
-					var image = $('<img>');
-					var url;
-					
-					$('#info .picture').empty();
-					
-					url = '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg';
-					image.attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
-					console.log(image[0].width);
-					
-					
-					$.ajax({
-						type: 'HEAD',
-						url: url,
-						success: function() {
-							$('#info .picture').append(image);
-						}
-					});
-					
-					//$('#info img').attr('src', '../airplanes/'+aList[hex].airline+'/'+aList[hex].registration+'.jpg');
-					//$('#info').animate({display: 'block'}, 500, function(){console.log("here");});
-					$('#info').removeClass('hidden');
-					$('#info').addClass('visible');
-				}
-			}
-		} else {
-
-			$('#info .flight .value').html('');
-			$('#info .altitude .value').html('');
-			$('#info .heading .value').html('');
-			$('#info .speed .value').html('');
-			$('#info .registration .value').html('');
-			$('#info .picture').empty();
-
-			$('#info').removeClass('visible');
-			$('#info').addClass('hidden');
-		}
-	}
-	
-	function imageExist(url) {
-		var img = new Image();
-		img.src = url;
-		
-		return img.height != 0;
-	}
-</script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="leaflet/leaflet.css" />
+	<link rel="stylesheet" href="leaflet/leaflet.label.css" />
+	<link rel="stylesheet" href="css/revairplanes.css" />
+	<script src="leaflet/leaflet.js"></script>
+	<script src="leaflet/leaflet.label.js"></script>
+	<script src="js/jquery-1.10.0.min.js"></script>
+	<script src="js/revairplanes.js"></script>
 </head>
 <body>
-	<div id="mapprovider"><select id="mapSelect"></select></div>
 	<div id="map" class="leaflet-container leaflet-fade-anim" style="position: relative;" tabindex="0"></div>
 	<div id="info" class="hidden">
-		<div class="container">
-			<div class='picture'></div>
-			<div class="flight"><p class="value big">CALLSIGN</p></div>
-			<div class="registration"><p class="value normal">CS-TGV</p></div>
-			<div class="origin"><p class="value normal"></p></div>
-			<div class="destination"><p class="value normal"></p></div>
-			<div class="speed"><p class="medium">Speed</p><p class="value normal">0 knot</p></div>
-			<div class="altitude"><p class="medium">Altitude</p><p class="value normal">0</p></div>
-			<div class="heading"><p class="medium">Heading</p><p class="value normal">0</p></div>
-			
+		<div class="picture"> 	
+		</div>
+		<div class="flight"></div>
+		<div class="registration"></div>
+		<div class="airports">
+			<div class="from">
+				<div class="caption">From</div>
+				<div class="value"></div>
+			</div>
+			<div class="to">
+				<div class="caption">To</div>
+				<div class="value"></div>
+			</div>		
+		</div>
+		<div class="speed">
+			<div class="caption">Speed</div>
+			<div class="value"></div>
+		</div>
+		<div class="altitude">
+			<div class="caption">Altitude</div>
+			<div class="value"></div>
+		</div>
+		<div class="heading">
+			<div class="caption">Heading</div>
+			<div class="value"></div>
 		</div>
 	</div>
 </body>

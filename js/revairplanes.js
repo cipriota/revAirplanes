@@ -83,6 +83,11 @@ function ProcessAircraftData(data) {
 					aircraft[data.modeS].flightInfo.destination.iata = data.destIATA;
 					aircraft[data.modeS].flightInfo.origin.name = data.originName;
 					aircraft[data.modeS].flightInfo.origin.iata = data.originIATA;
+
+					MapDrawAircraft(aircraft[modeS]);
+			
+					if (selectedId==modeS)
+						MapRefreshInfo(aircraft[modeS]);
 	
 				}
 
