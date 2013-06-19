@@ -46,9 +46,9 @@ function ProcessAircraftData(data) {
 			aircraft[modeS].flightInfo = {};
 			aircraft[modeS].flightInfo.destination = {};
 			aircraft[modeS].flightInfo.origin = {};
-			aircraft[modeS].flightInfo.destination.name = "-";
+			//aircraft[modeS].flightInfo.destination.name = "-";
 			aircraft[modeS].flightInfo.destination.iata = "-";
-			aircraft[modeS].flightInfo.origin.name = "-";
+			//aircraft[modeS].flightInfo.origin.name = "-";
 			aircraft[modeS].flightInfo.origin.iata = "-";
 			
 			$.getJSON('getinfo.php?modeS='+modeS).done(function (data){
@@ -59,7 +59,7 @@ function ProcessAircraftData(data) {
 					aircraft[data.modeS].registration = data.registration;
 				
 				aircraft[data.modeS].airline = data.airline;
-					
+				aircraft[data.modeS].aircraftType = data.aircraftType;
 			});
 		}
 
@@ -77,7 +77,7 @@ function ProcessAircraftData(data) {
 			aircraft[modeS].flight = obj.flight;
 			
 			$.getJSON('getflight.php?modeS=' + modeS + "&flight=" + aircraft[modeS].flight).done(function (data){
-				
+
 				if (data.destName != "") {
 					aircraft[data.modeS].flightInfo.destination.name = data.destName;
 					aircraft[data.modeS].flightInfo.destination.iata = data.destIATA;
@@ -181,11 +181,14 @@ function MapRefreshInfo(aircraftObj) {
 	if ($('#info').hasClass('visible')) {
 		$('#info .flight').html(aircraftObj.flight);
 		$('#info .registration').html(aircraftObj.registration);
+		$('#info .type').html(aircraftObj.aircraftType);
 		$('#info .speed .value').html(aircraftObj.speed);
 		$('#info .altitude .value').html(aircraftObj.altitude);
 		$('#info .heading .value').html(aircraftObj.track);
 		$('#info .from .value').html(aircraftObj.flightInfo.origin.iata);
+		$('#info .from .value2').html(aircraftObj.flightInfo.origin.name);
 		$('#info .to .value').html(aircraftObj.flightInfo.destination.iata);
+		$('#info .to .value2').html(aircraftObj.flightInfo.destination.name);
 	}
 }
 

@@ -11,7 +11,7 @@
 		$dbh = new PDO('sqlite:../db/basestation.sqb');
 	
 
-  		$st = $dbh->query('SELECT registration, OperatorFlagCode FROM aircraft where modeS like \''.$hex.'\'');
+  		$st = $dbh->query('SELECT registration, OperatorFlagCode, ICAOTypeCode FROM aircraft where modeS like \''.$hex.'\'');
   		
   		$st->setFetchMode(PDO::FETCH_OBJ);
   		
@@ -19,9 +19,10 @@
   		
 		$registration = $result->Registration;
 		$airline = $result->OperatorFlagCode;
+		$aircraftType = $result->ICAOTypeCode;
 		
 
-		print "{\"modeS\": \"" . $hex . "\",\"registration\": \"" . $result->Registration . "\",\"airline\": \"".$result->OperatorFlagCode."\" }";
+		print "{\"modeS\": \"" . $hex . "\",\"registration\": \"" . $result->Registration . "\",\"airline\": \"".$result->OperatorFlagCode."\", \"aircraftType\": \"" . $aircraftType . "\" }";
 
 		$dbh = null;
 	} catch (PDOException $e) {

@@ -6,6 +6,8 @@ body {
 
 html, body, #map { height: 100%; }
 
+.label { background: none !important; color: #DD0; text-shadow: 1px 1px #000; }
+
 .visible { display: block; }
 .hidden { display: none; }
 .leaflet-marker-icon { background: none !important; border: 0 !important; }
@@ -36,15 +38,27 @@ html, body, #map { height: 100%; }
 #info .flight {
 	font-size: 24px; 
 	margin-bottom: 5px; 
+	display: inline-block;
+	width: 100%;
 }
 
 #info .registration {
 	font-size: 12px; 
-	margin-bottom: 20px; 
+	display: inline-block;
+	margin-bottom: 5px;
+}
+
+#info .type {
+	margin-bottom: 20px;
 }
 
 #info .value {
+	display: inline-block;
 	font-size: 14px; 
+}
+
+#info .value2 {
+	font-size: 10px; 
 }
 
 #info .caption {
@@ -59,7 +73,7 @@ html, body, #map { height: 100%; }
 }
 
 #info .picture {
-	 margin-bottom: 20px; 
+	 margin-bottom: 10px; 
 }
 
 #info .picture img {
