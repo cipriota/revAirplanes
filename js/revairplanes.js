@@ -46,13 +46,13 @@ function ProcessAircraftData(data) {
 			aircraft[modeS].flightInfo = {};
 			aircraft[modeS].flightInfo.destination = {};
 			aircraft[modeS].flightInfo.origin = {};
-			//aircraft[modeS].flightInfo.destination.name = "-";
+			aircraft[modeS].flightInfo.destination.name = "";
 			aircraft[modeS].flightInfo.destination.iata = "-";
-			//aircraft[modeS].flightInfo.origin.name = "-";
+			aircraft[modeS].flightInfo.origin.name = "";
 			aircraft[modeS].flightInfo.origin.iata = "-";
 			
 			$.getJSON('getinfo.php?modeS='+modeS).done(function (data){
-			
+
 				if (!data.registration || data.registration == '') 
 					aircraft[data.modeS].registration = "-";
 				else 
@@ -159,23 +159,23 @@ function MapDrawAircraft(aircraftObj) {
 }
 
 function MapRefreshInfo(aircraftObj) {
-	if ($('#info .registration').html()!=aircraftObj.registration && aircraftObj.flight) {
+	if ($('#info .registration').html()!=aircraftObj.registration && aircraftObj.flight && aircraftObj.airline!=null) {
 		var image = $('<img>');
 		var url;
 		
 		$('#info .picture').empty();
-					
-		url = '../airplanes/'+aircraftObj.airline+'/'+aircraftObj.registration+'.jpg';
 		
+		url = '../airplanes/'+aircraftObj.airline+'/'+aircraftObj.registration+'.jpg';
 
 		$.ajax({
 			type: 'HEAD',
 			url: url,
-			success: function() {
-				image.attr('src', '../airplanes/'+aircraftObj.airline+'/'+aircraftObj.registration+'.jpg');
+			success: function(data) {
+				image.attr('src', url);
 				$('#info .picture').append(image);
 			}
 		});
+		
 	}
 	
 	if ($('#info').hasClass('visible')) {

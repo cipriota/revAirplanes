@@ -2,7 +2,6 @@
 	// Aircraft type;
 	//
 	$hex = $_GET['modeS'];
-	$flight = $_GET['flight'];
 
 	if ($hex==null)
 		die;

@@ -7,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   height="20"
+   height="25"
    id="svg1960"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="airplane.svg"
    sodipodi:version="0.32"
-   width="20"
+   width="25"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    inkscape:export-filename="/home/joanna/gfx/vector/aiga/aiga_air_transportation_.png"
    inkscape:export-xdpi="38.97765"
@@ -24,17 +24,17 @@
      id="base"
      inkscape:current-layer="svg1960"
      inkscape:cx="11.897207"
-     inkscape:cy="22.255523"
+     inkscape:cy="14.112103"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:window-height="744"
-     inkscape:window-width="1366"
+     inkscape:window-height="399"
+     inkscape:window-width="436"
      inkscape:window-x="1920"
      inkscape:window-y="386"
      inkscape:zoom="9.8238822"
      pagecolor="#ffffff"
      showgrid="false"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="0" />
   <defs
      id="defs1962">
     <inkscape:perspective
@@ -75,7 +75,7 @@
   </defs>
   <g
      id="g1970"
-     transform="matrix(0.04246609,0,0,0.04129369,0.48868074,0.48867897)"
+     transform="matrix(0.0530826,0,0,0.05161711,0.61085081,0.61085262)"
      style="fill:#00ff00;stroke:#000000;stroke-width:23.33953667000000110;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
      inkscape:export-filename="/home/andresavva/Desktop/airplane.png"
      inkscape:export-xdpi="72.000008"
