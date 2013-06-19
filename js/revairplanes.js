@@ -104,7 +104,7 @@ function ProcessAircraftData(data) {
 	for (i in aircraft) {
 		if (!aircraft[i].active) {
 		
-			map.removeLayer(aircraft[i]);
+			map.removeLayer(aircraft[i].marker);
 			
 			aircraft[i] = null;
 			delete aircraft[i];
