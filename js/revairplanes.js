@@ -128,7 +128,7 @@ function MapDrawAircraft(aircraftObj) {
 	
 	if (!marker) {
 		marker = {};
-		marker = new L.marker([aircraftObj.lat, aircraftObj.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [20,20] })});
+		marker = new L.marker([aircraftObj.lat, aircraftObj.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [25,25] })});
 		marker.bindLabel(aircraft.flight, { noHide: true, className: 'label' });
 		marker.addTo(map);
 		marker.showLabel();
@@ -203,7 +203,7 @@ function MapDraw() {
 
 	map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 8);
 
-	layer = L.tileLayer('../tiles/cloudmate/{z}/{x}/{y}.png', layerOptions).addTo(map);
+	layer = L.tileLayer.grayscale('../tiles/cloudmate/{z}/{x}/{y}.png', layerOptions).addTo(map);
 	zoomControl.addTo(map);
 
 }
