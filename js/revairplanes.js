@@ -206,7 +206,7 @@ function MapDraw() {
 
 	map = L.map('map', {zoomControl: false}).setView([38.76,-9.12], 8);
 
-	layer = L.tileLayer.grayscale('../tiles/cloudmate/{z}/{x}/{y}.png', layerOptions).addTo(map);
+	layer = L.tileLayer('../tiles/cloudmate/{z}/{x}/{y}.png', layerOptions).addTo(map);
 	zoomControl.addTo(map);
 
 }
