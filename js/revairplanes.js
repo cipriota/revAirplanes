@@ -129,7 +129,7 @@ function MapDrawAircraft(aircraftObj) {
 	if (!marker) {
 		marker = {};
 		marker = new L.marker([aircraftObj.lat, aircraftObj.lon], {icon: new L.Icon({iconUrl: 'img/airplane.png', iconSize: [25,25] })});
-		marker.bindLabel(aircraft.flight, { noHide: true, className: 'label' });
+		marker.bindLabel("", { noHide: true, className: 'label' });
 		marker.addTo(map);
 		marker.showLabel();
 		
@@ -152,7 +152,7 @@ function MapDrawAircraft(aircraftObj) {
 
 	marker.setLatLng(new L.LatLng(aircraftObj.lat, aircraftObj.lon));
 	marker.setIcon(new L.divIcon({html: icon.css('-webkit-transform', 'rotate(' + aircraftObj.track + 'deg)')[0].outerHTML}));
-	marker.updateLabelContent(aircraftObj.flight);
+	marker.updateLabelContent('<p class="flight">' + aircraftObj.flight + '</p><p class="speed">' + aircraftObj.speed + ' knot</p><p class="altitude">' + aircraftObj.altitude + ' ft</p>');
 	
 	aircraftObj.marker = marker;
 	

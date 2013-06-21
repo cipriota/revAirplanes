@@ -7,6 +7,8 @@ body {
 html, body, #map { height: 100%; }
 
 .label { background: none !important; color: #DD0; text-shadow: 1px 1px #000; }
+.label p { line-height: 10px; margin: 2px 0 2px 4px; }
+.label .flight { color: #FFF; margin-bottom: 4px; }
 
 .visible { display: block; }
 .hidden { display: none; }

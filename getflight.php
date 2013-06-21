@@ -19,6 +19,7 @@
 		$originIATA = $result->originIATA;
 		$destName = $result->destName;
 		$destIATA = $result->destIATA;
+		$airlineName = $result->airlineName;
 
 		print "{ \"modeS\": \"" . $hex . "\", \"originName\": \"".$originName."\", \"originIATA\": \"".$originIATA."\", \"destName\": \"".$destName."\", \"destIATA\": \"".$destIATA."\" }";
 
